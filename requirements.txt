@@ -8,3 +8,4 @@ streamlit
 requests
 numpy
 Pillow
+streamlit-webrtc
