@@ -8,7 +8,7 @@ import time
 
 app = FastAPI()
 
-model = YOLO("best.pt")
+model = YOLO(""/workspace/mudra/best.ptbest.pt")
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 camera = None
