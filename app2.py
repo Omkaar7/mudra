@@ -82,7 +82,7 @@ async def infer_batch(files: List[UploadFile] = File(...)):
 
     results = model.predict(
         source=frames,
-        conf=0.4,
+        conf=0.5,
         device=device,
         verbose=False
     )
