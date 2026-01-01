@@ -10,7 +10,7 @@ app = FastAPI(title="YOLOv11 RunPod Inference")
 # ==========================
 # LOAD MODEL
 # ==========================
-MODEL_PATH = r"E:\codes\Mudra_detection\best.pt"   # place your model here
+MODEL_PATH ="/workspace/mudra/best.pt"   # place your model here
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 model = YOLO(MODEL_PATH)
