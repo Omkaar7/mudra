@@ -6,7 +6,7 @@ import numpy as np
 from streamlit_webrtc import webrtc_streamer, RTCConfiguration, WebRtcMode
 
 # ================= CONFIG =================
-BACKEND_URL = "http://127.0.0.1:8000/infer_batch"
+BACKEND_URL = "http://157.157.221.29:8000/infer_batch"
 CAPTURE_SECONDS = 5
 FPS = 2 
 TOTAL_FRAMES = CAPTURE_SECONDS * FPS
