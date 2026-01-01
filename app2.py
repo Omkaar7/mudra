@@ -1,50 +1,3 @@
-# from fastapi import FastAPI, UploadFile, File
-# from typing import List
-# import cv2
-# import numpy as np
-# import base64
-# import torch
-# from ultralytics import YOLO
-
-# app = FastAPI()
-
-# # Load Model once on startup
-# MODEL_PATH = "best.pt" 
-# device = "cuda" if torch.cuda.is_available() else "cpu"
-# model = YOLO(MODEL_PATH).to(device)
-
-# @app.post("/infer_batch")
-# async def infer_batch(files: List[UploadFile] = File(...)):
-#     frames = []
-    
-#     # 1. Decode all incoming images
-#     for file in files:
-#         data = await file.read()
-#         img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
-#         if img is not None:
-#             frames.append(img)
-
-#     if not frames:
-#         return {"frames": [], "msg": "No frames received"}
-
-#     # 2. Batch Inference (passing the whole list is faster)
-#     results = model.predict(source=frames, conf=0.4, device=device, verbose=False)
-
-#     # 3. Annotate and Encode
-#     processed_b64 = []
-#     for r in results:
-#         annotated_img = r.plot() 
-#         _, buffer = cv2.imencode(".jpg", annotated_img, [cv2.IMWRITE_JPEG_QUALITY, 85])
-#         img_str = base64.b64encode(buffer).decode("utf-8")
-#         processed_b64.append(img_str)
-
-#     return {"frames": processed_b64}
-
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
 from fastapi import FastAPI, UploadFile, File
 from typing import List
 import cv2
@@ -52,45 +5,124 @@ import numpy as np
 import base64
 import torch
 from ultralytics import YOLO
+import logging
+import time
 
-app = FastAPI()
+# ==========================
+# LOGGING CONFIG
+# ==========================
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
+logger = logging.getLogger("MudraAI")
 
-# Load Model once on startup
-MODEL_PATH = "best.pt" 
+# ==========================
+# APP INIT
+# ==========================
+app = FastAPI(title="MudraAI YOLOv11 Backend")
+
+# ==========================
+# MODEL LOAD
+# ==========================
+MODEL_PATH = "best.pt"
 device = "cuda" if torch.cuda.is_available() else "cpu"
+
+logger.info("🚀 Starting MudraAI Backend...")
+logger.info(f"📦 Loading YOLO model from: {MODEL_PATH}")
+logger.info(f"🧠 Using device: {device}")
+
 model = YOLO(MODEL_PATH).to(device)
 
+logger.info("✅ Model loaded successfully")
+
+# ==========================
+# HEALTH CHECK
+# ==========================
 @app.get("/")
 async def health_check():
+    logger.info("🩺 Health check ping received")
     return {"status": "healthy", "message": "MudraAI Backend is running"}
 
+# ==========================
+# BATCH INFERENCE
+# ==========================
 @app.post("/infer_batch")
 async def infer_batch(files: List[UploadFile] = File(...)):
+    request_start = time.time()
+    logger.info(f"📥 Received infer_batch request with {len(files)} files")
+
     frames = []
-    
-    # 1. Decode all incoming images
-    for file in files:
+
+    # --------------------------
+    # Decode images
+    # --------------------------
+    for idx, file in enumerate(files):
         data = await file.read()
         img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
-        if img is not None:
-            frames.append(img)
+
+        if img is None:
+            logger.warning(f"⚠️ Frame {idx} could not be decoded")
+            continue
+
+        frames.append(img)
+        logger.info(f"🖼️ Frame {idx} decoded successfully | shape={img.shape}")
 
     if not frames:
-        return {"frames": [], "msg": "No frames received"}
+        logger.error("❌ No valid frames received")
+        return {"frames": [], "msg": "No valid frames received"}
 
-    # 2. Batch Inference (passing the whole list is faster)
-    results = model.predict(source=frames, conf=0.4, device=device, verbose=False)
+    logger.info(f"✅ Total valid frames: {len(frames)}")
 
-    # 3. Annotate and Encode
+    # --------------------------
+    # Batch inference
+    # --------------------------
+    infer_start = time.time()
+    logger.info("🤖 Starting YOLO batch inference")
+
+    results = model.predict(
+        source=frames,
+        conf=0.4,
+        device=device,
+        verbose=False
+    )
+
+    infer_time = time.time() - infer_start
+    logger.info(f"⚡ Inference completed in {infer_time:.2f}s")
+
+    # --------------------------
+    # Encode results
+    # --------------------------
     processed_b64 = []
-    for r in results:
-        annotated_img = r.plot() 
-        _, buffer = cv2.imencode(".jpg", annotated_img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+
+    for idx, r in enumerate(results):
+        annotated_img = r.plot()
+        success, buffer = cv2.imencode(
+            ".jpg",
+            annotated_img,
+            [cv2.IMWRITE_JPEG_QUALITY, 85]
+        )
+
+        if not success:
+            logger.warning(f"⚠️ Encoding failed for frame {idx}")
+            continue
+
         img_str = base64.b64encode(buffer).decode("utf-8")
         processed_b64.append(img_str)
 
+        logger.info(f"📦 Frame {idx} annotated & encoded")
+
+    total_time = time.time() - request_start
+    logger.info(
+        f"✅ Request completed | Frames={len(processed_b64)} | Total time={total_time:.2f}s"
+    )
+
     return {"frames": processed_b64}
 
+# ==========================
+# RUN SERVER
+# ==========================
 if __name__ == "__main__":
     import uvicorn
+    logger.info("🌐 Starting Uvicorn server on 0.0.0.0:8000")
     uvicorn.run(app, host="0.0.0.0", port=8000)
