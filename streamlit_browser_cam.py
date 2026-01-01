@@ -6,9 +6,9 @@ import numpy as np
 from streamlit_webrtc import webrtc_streamer, RTCConfiguration, WebRtcMode
 
 # ================= CONFIG =================
-BACKEND_URL = "http://157.157.221.29:8000/infer_batch"
-CAPTURE_SECONDS = 5
-FPS = 2 
+BACKEND_URL = "https://8knckq5xwxalxn-8000.proxy.runpod.net/infer_batch"
+CAPTURE_SECONDS = 3
+FPS = 5
 TOTAL_FRAMES = CAPTURE_SECONDS * FPS
 
 RTC_CONFIGURATION = RTCConfiguration(
@@ -27,8 +27,8 @@ class VideoProcessor:
         return frame
 
 # ================= PAGE =================
-st.set_page_config(page_title="YOLOv11 Hand Detection", layout="wide")
-st.title("🖐️ YOLOv11 Burst Inference")
+st.set_page_config(page_title="Kathak Mudra Detection", layout="wide")
+st.title("Kathak Mudra Detection")
 
 # Initialize WebRTC with the processor
 ctx = webrtc_streamer(
