@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kathak Mudra AI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- BACKGROUND EFFECTS -->
+<div class="bg-mesh"></div>
+<div class="bg-mesh"></div>
+<div class="bg-blobs">
+  <span></span><span></span><span></span>
+</div>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-left">
+    <h1>Kathak Mudra AI</h1>
+    <span>Indian Classical Dance • AI • Computer Vision</span>
+  </div>
+
+  <button id="themeToggle" class="theme-btn">🌙 Dark</button>
+</header>
+
+<!-- MAIN FULL HEIGHT -->
+<main class="app-main" >
+
+  <section class="hero">
+
+    <!-- VIDEO -->
+    <div class="video-card glass">
+      <video id="video" autoplay playsinline muted></video>
+      <div class="video-overlay" id="videoOverlay">Camera is OFF</div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="side-panel glass">
+      <h2>Mudra Detection</h2>
+      <p>
+        Experience Kathak mudra recognition using
+        deep learning and computer vision.
+      </p>
+
+      <div class="controls">
+        <button id="startCam" class="btn primary glow">🎥 Start Camera</button>
+        <button id="capture" class="btn success glow" disabled>🚀 Capture & Infer</button>
+      </div>
+
+      <div id="status" class="status"></div>
+      <progress id="progress" value="0" max="100"></progress>
+      <div id="results" class="results"></div>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="app-footer">
+  <p>Preserving Indian Classical Dance using AI</p>
+  <p>contact@kathakmudra.ai • +91 98765 43210</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
